@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>UKW Management</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+font-family:'Poppins',sans-serif;
+background:#efe7da;
+background-image:url("https://www.transparenttextures.com/patterns/paper.png");
+overflow-x:hidden;
+}
+
+/* main card */
+
+.main-card{
+background:#fff4e6;
+border:3px solid #e6ccb2;
+box-shadow:8px 8px 0px #d4a373;
+position:relative;
+}
+
+/* tape decoration */
+
+.tape{
+position:absolute;
+width:120px;
+height:25px;
+background:#fbc4ab;
+opacity:0.7;
+top:-12px;
+left:40%;
+transform:rotate(-3deg);
+}
+
+/* vintage boxes */
+
+.box{
+background:#fefae0;
+border:2px dashed #dda15e;
+box-shadow:3px 3px 0px #e9edc9;
+}
+
+/* button */
+
+.btn{
+background:#dda15e;
+color:white;
+font-weight:600;
+transition:0.2s;
+}
+
+.btn:hover{
+background:#bc6c25;
+transform:scale(1.02);
+}
+
+/* table */
+
+thead{
+background:#faedcd;
+}
+
+/* doodle elements */
+
+.doodle{
+position:fixed;
+opacity:0.6;
+}
+
+.star{font-size:28px;}
+.spark{font-size:24px;}
+.tv{font-size:42px;}
+.clock{font-size:40px;}
+.scribble{font-size:35px;}
+.tape2{font-size:30px;}
+
+/* positions */
+
+.s1{top:50px;right:60px;}
+.s2{top:120px;right:120px;}
+.s3{bottom:90px;left:80px;}
+.s4{bottom:40px;right:120px;}
+
+.tv1{bottom:30px;right:40px;}
+.clock1{top:40px;left:40px;}
+.scr1{bottom:120px;left:30px;}
+.scr2{top:200px;right:30px;}
+.tape3{top:300px;left:20px;}
+
+.title{
+font-family:'Playfair Display',serif;
+letter-spacing:2px;
+}
+
+</style>
+
+</head>
+
+<body class="p-6">
+
+<!-- doodles -->
+
+<div class="doodle star s1">✦</div>
+<div class="doodle star s2">☆</div>
+<div class="doodle spark s3">✧</div>
+<div class="doodle spark s4">✦</div>
+
+<div class="doodle tv tv1">📺</div>
+<div class="doodle clock clock1">🕒</div>
+
+<div class="doodle scribble scr1">〰️</div>
+<div class="doodle scribble scr2">➰</div>
+
+<div class="doodle tape2 tape3">📎</div>
+
+<div class="max-w-2xl mx-auto p-8 rounded-xl main-card">
+
+<div class="tape"></div>
+
+<h1 class="text-3xl text-center mb-8 title">💰 UKW Management</h1>
+
+<div class="grid grid-cols-3 gap-4 text-center mb-8">
+
+<div class="p-4 rounded-lg box">
+<p class="text-sm">Income</p>
+<p id="totalIn" class="font-bold text-green-700">Rp 0</p>
+</div>
+
+<div class="p-4 rounded-lg box">
+<p class="text-sm">Expense</p>
+<p id="totalOut" class="font-bold text-red-700">Rp 0</p>
+</div>
+
+<div class="p-4 rounded-lg box">
+<p class="text-sm">Balance</p>
+<p id="balance" class="font-bold text-gray-800">Rp 0</p>
+</div>
+
+</div>
+
+<div class="space-y-3 mb-6">
+
+<input id="desc" placeholder="Description"
+class="w-full p-2 border rounded">
+
+<input id="amount" type="number" placeholder="Amount (Rp)"
+class="w-full p-2 border rounded">
+
+<select id="type" class="w-full p-2 border rounded">
+<option value="in">Money In</option>
+<option value="out">Money Out</option>
+</select>
+
+<button onclick="addTransaction()" class="w-full p-2 rounded btn">
+Add Transaction
+</button>
+
+</div>
+
+<h2 class="font-semibold mb-3">Transaction History</h2>
+
+<table class="w-full text-sm">
+
+<thead>
+<tr>
+<th class="p-2">Description</th>
+<th class="p-2 text-right">Amount</th>
+<th class="p-2 text-center">Delete</th>
+</tr>
+</thead>
+
+<tbody id="historyBody"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+let transactions = JSON.parse(localStorage.getItem('kas_data')) || [];
+
+function formatRupiah(num){
+return "Rp " + Number(num).toLocaleString('id-ID');
+}
+
+function updateUI(){
+
+const historyBody=document.getElementById('historyBody');
+historyBody.innerHTML='';
+
+let totalIn=0;
+let totalOut=0;
+
+transactions.forEach((t,index)=>{
+
+const row=document.createElement('tr');
+
+const color=t.type==='in'?'green':'red';
+const prefix=t.type==='in'?'+':'-';
+
+row.innerHTML=`
+
+<td class="p-2">${t.desc}</td>
+
+<td class="p-2 text-right text-${color}-600">
+${prefix} ${formatRupiah(t.amount)}
+</td>
+
+<td class="text-center">
+<button onclick="deleteItem(${index})">❌</button>
+</td>
+
+`;
+
+historyBody.appendChild(row);
+
+if(t.type==='in') totalIn+=Number(t.amount);
+else totalOut+=Number(t.amount);
+
+});
+
+document.getElementById('totalIn').innerText=formatRupiah(totalIn);
+document.getElementById('totalOut').innerText=formatRupiah(totalOut);
+document.getElementById('balance').innerText=formatRupiah(totalIn-totalOut);
+
+localStorage.setItem('kas_data',JSON.stringify(transactions));
+
+}
+
+function addTransaction(){
+
+const desc=document.getElementById('desc').value;
+const amount=document.getElementById('amount').value;
+const type=document.getElementById('type').value;
+
+if(!desc||!amount) return alert("Fill all fields");
+
+transactions.push({desc,amount,type});
+
+updateUI();
+
+document.getElementById('desc').value='';
+document.getElementById('amount').value='';
+
+}
+
+function deleteItem(index){
+
+if(confirm("Delete?")){
+transactions.splice(index,1);
+updateUI();
+}
+
+}
+
+updateUI();
+
+</script>
+
+</body>
+</html>
